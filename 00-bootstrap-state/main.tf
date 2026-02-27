@@ -63,13 +63,8 @@ resource "aws_dynamodb_table" "terraform_locks" {
 
 # Definisce GitHub come provider OIDC
 
-resource "aws_iam_openid_connect_provider" "github" {
+data "aws_iam_openid_connect_provider" "github" {
   url            = "https://token.actions.githubusercontent.com"
-  client_id_list = ["sts.amazonaws.com"]
-
-  # Serve per la CA di GitHub.
-  # È pubblico e standard per GitHub Actions, l'ho copiato così come è.
-  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
 }
 
 # Data source per generare la Trust Policy in modo pulito
@@ -79,7 +74,7 @@ data "aws_iam_policy_document" "github_trust_policy" {
 
     principals {
       type        = "Federated"
-      identifiers = [aws_iam_openid_connect_provider.github.arn]
+      identifiers = [data.aws_iam_openid_connect_provider.github.arn]
     }
 
     condition {
@@ -99,7 +94,7 @@ data "aws_iam_policy_document" "github_trust_policy" {
 
 # Creazione del Ruolo IAM
 resource "aws_iam_role" "github_actions_role" {
-  name               = "GitHubActionsDeployRole"
+  name               = "terraform-role-container-monitoring"
   assume_role_policy = data.aws_iam_policy_document.github_trust_policy.json
 }
 
@@ -172,10 +167,4 @@ resource "aws_iam_role_policy" "terraform_permissions" {
       }
     ]
   })
-}
-
-
-output "github_role_arn" {
-  value       = aws_iam_role.github_actions_role.arn
-  description = "L'ARN da incollare nel file YAML della GitHub Action"
 }
