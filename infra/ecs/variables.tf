@@ -18,3 +18,23 @@ variable "public_subnet_ids" {
   type        = list(string)
 }
 
+variable "private_subnet_ids" {
+  description = "Private subnet IDs"
+  type        = list(string)
+}
+
+variable "ecs_security_group_ingress_port" {
+  description = "Port ECS service listens on"
+  type        = number
+  default     = 80
+}
+
+variable "ecs_task_execution_role_arn" {
+  description = "ECS task execution role ARN"
+  type        = string
+}
+
+variable "ecs_task_role_arn" {
+  description = "ECS task role ARN"
+  type        = string
+}
